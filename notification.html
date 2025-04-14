@@ -1,0 +1,52 @@
+<script type="text/javascript">
+    var gk_fileData = {};
+    function loadFileData(filename) {
+      return gk_fileData[filename] || "";
+    }
+    </script><!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>網頁通知</title>
+</head>
+<body>
+    <h1>網頁通知測試</h1>
+    <button onclick="triggerNotification()">點擊後5秒顯示通知</button>
+
+    <script>
+        // 請求通知權限
+        function requestNotificationPermission(callback) {
+            if (!("Notification" in window)) {
+                alert("此瀏覽器不支援通知功能");
+                return;
+            }
+
+            Notification.requestPermission().then(permission => {
+                if (permission === "granted") {
+                    callback();
+                } else if (permission === "denied") {
+                    alert("通知權限被拒絕，請檢查瀏覽器設定");
+                }
+            });
+        }
+
+        // 顯示通知
+        function showNotification() {
+            if (Notification.permission === "granted") {
+                new Notification("測試通知", {
+                    body: "這是一則來自網頁的通知！",
+                    icon: "https://via.placeholder.com/32" // 可選的小圖示
+                });
+            }
+        }
+
+        // 按鈕觸發5秒後通知
+        function triggerNotification() {
+            requestNotificationPermission(() => {
+                setTimeout(showNotification, 5000);
+            });
+        }
+    </script>
+</body>
+</html>
