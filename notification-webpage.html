@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chrome 通知示範</title>
+    <style>
+        body {
+            font-family: "Microsoft JhengHei", Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .notification-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        button {
+            padding: 12px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #4285f4;
+            color: white;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #3367d6;
+        }
+        
+        #status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: #f8f9fa;
+            border-left: 4px solid #ccc;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Chrome 通知示範</h1>
+        
+        <div class="notification-controls">
+            <button id="requestPermission">請求通知權限</button>
+            
+            <div class="input-group">
+                <label for="notificationTitle">通知標題：</label>
+                <input type="text" id="notificationTitle" value="測試通知" placeholder="輸入通知標題">
+            </div>
+            
+            <div class="input-group">
+                <label for="notificationBody">通知內容：</label>
+                <input type="text" id="notificationBody" value="這是一個測試通知的內容，您已成功顯示通知！" placeholder="輸入通知內容">
+            </div>
+            
+            <button id="showNotification">顯示通知</button>
+        </div>
+        
+        <div id="status">狀態：等待請求權限</div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const requestPermissionBtn = document.getElementById('requestPermission');
+            const showNotificationBtn = document.getElementById('showNotification');
+            const statusDiv = document.getElementById('status');
+            const titleInput = document.getElementById('notificationTitle');
+            const bodyInput = document.getElementById('notificationBody');
+            
+            // 檢查當前通知權限
+            function checkPermission() {
+                if (Notification.permission === 'granted') {
+                    statusDiv.textContent = '狀態：已獲得通知權限，可以顯示通知。';
+                    statusDiv.style.borderLeftColor = '#4caf50';
+                    requestPermissionBtn.disabled = true;
+                } else if (Notification.permission === 'denied') {
+                    statusDiv.textContent = '狀態：通知權限已被拒絕。請在瀏覽器設定中允許此網站的通知，或點擊地址欄右側的通知圖標設定權限。';
+                    statusDiv.style.borderLeftColor = '#f44336';
+                } else {
+                    statusDiv.textContent = '狀態：尚未請求通知權限，請先點擊"請求通知權限"按鈕。';
+                    statusDiv.style.borderLeftColor = '#ff9800';
+                }
+            }
+            
+            // 請求通知權限
+            requestPermissionBtn.addEventListener('click', async () => {
+                try {
+                    const permission = await Notification.requestPermission();
+                    checkPermission();
+                } catch (error) {
+                    statusDiv.textContent = `狀態：請求權限時發生錯誤: ${error.message}`;
+                    statusDiv.style.borderLeftColor = '#f44336';
+                }
+            });
+            
+            // 顯示通知
+            showNotificationBtn.addEventListener('click', () => {
+                if (Notification.permission !== 'granted') {
+                    statusDiv.textContent = '狀態：尚未獲得通知權限，無法顯示通知。請先點擊"請求通知權限"按鈕。';
+                    statusDiv.style.borderLeftColor = '#f44336';
+                    return;
+                }
+                
+                const title = titleInput.value || '測試通知';
+                const body = bodyInput.value || '這是一個測試通知的內容，您已成功顯示通知！';
+                
+                try {
+                    const notification = new Notification(title, {
+                        body: body,
+                        icon: '/api/placeholder/64/64'
+                    });
+                    
+                    notification.onclick = () => {
+                        window.focus();
+                        notification.close();
+                    };
+                    
+                    statusDiv.textContent = '狀態：通知已顯示成功！';
+                    statusDiv.style.borderLeftColor = '#4caf50';
+                } catch (error) {
+                    statusDiv.textContent = `狀態：顯示通知時發生錯誤: ${error.message}`;
+                    statusDiv.style.borderLeftColor = '#f44336';
+                }
+            });
+            
+            // 頁面載入時檢查權限
+            checkPermission();
+        });
+    </script>
+</body>
+</html>
